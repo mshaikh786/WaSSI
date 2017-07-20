@@ -1,0 +1,41 @@
+FC=mpif90
+MPIF90=mpif90
+SRC= GENERAL.f90 PET.f90 VALIDATION.f90 CARBONBAL.f90 OUTPUT.f90 SUMMARY.f90 WARMUP.f90 WATERBAL.f90 ARRAY_ALLO.f90 ARRAY_DEALLO.f90 MPI_SUBROUTINES.f90 PARALLEL_FILE_IO.f90 
+OBJ= GENERAL.o PET.o VALIDATION.o CARBONBAL.o OUTPUT.o SUMMARY.o WARMUP.o WATERBAL.o ARRAY_ALLO.o ARRAY_DEALLO.o MPI_SUBROUTINES.o PARALLEL_FILE_IO.o 
+PRGENV=GCC #$(echo $(COMPILER)| tr '[:lower:]' '[:upper:]') 
+#ifeq ($(PRGENV),INTEL)
+#	OMPFLAG=-openmp
+#	FC=ifort
+#	MPIF90=mpif90
+#	ALLINEA_SGIMPT=-L/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/INTEL/mpt  -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr -Wl,-rpath=/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/INTEL/mpt 
+#	ALLINEA_MPICH=-L/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/INTEL/mpich  -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr -Wl,-rpath=/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/INTEL/mpich
+#lse ifeq ($(PRGENV),GCC)
+#	OMPFLAG=-fopenmp
+#	FC=gfortran
+#	MPIF90=mpif90
+#endif 
+ALLINEA_SGIMPT=-L/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/INTEL/mpt  -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr -Wl,-rpath=/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/INTEL/mpt
+ALLINEA_MPICH=-L/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/GNU/4.8.5/mpich  -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr -Wl,-rpath=/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/GNU/4.8.5/mpich
+SGIMPT_LIBS=-L$(MPI_ROOT)/lib -lmpi $(ALLINEA_SGIMPT)
+SGIMPT_INC=-I $(MPI_ROOT)/include
+MPICH_LIBS=-L $(MAALI_MPICH_HOME)/lib -lmpichf90
+MPICH_INC=-I $(MAALI_MPICH_HOME)/include
+DEBUG = -g -mcmodel=medium -cpp -fPIC -fopenmp -DMPI 
+FCFLAGS = $(DEBUG) -I $(MAALI_MPICH_HOME)/include
+FFLAGS =  $(DEBUG) -I $(MAALI_MPICH_HOME)/include
+LDFLAGS_MAP=$(MPICH_LIBS) $(ALLINEA_MPICH)
+LDFLAGS=$(MPICH_LIBS)
+all: WaSSI-serial WaSSI-hybrid
+	
+WaSSI-serial: WaSSI-serial.o
+	$(FC) $(FFLAGS) $(OMPFLAG) $(OBJ) $(LDFLAGS_MAP) -o WaSSI-serial-map
+	$(FC) $(FFLAGS) $(OMPFLAG) $(OBJ) $(LDFLAGS) -o WaSSI-serial
+WaSSI-serial.o: $(SRC)
+	$(FC) $(FCFLAGS) -c $(SRC)
+WaSSI-hybrid: WaSSI-hybrid.o
+	$(MPIF90) $(FFLAGS) $(OMPFLAG) $(LDFLAGS_MAP) $(OBJ) -o WaSSI-hybrid-map
+	$(MPIF90) $(FFLAGS) $(OMPFLAG) $(LDFLAGS) $(OBJ) -o WaSSI-hybrid
+WaSSI-hybrid.o:
+	$(MPIF90) $(FCFLAGS) -c $(SRC)
+clean:
+	rm *.o *.mod a.out fort.* WaSSI-serial WaSSI-hybrid
