@@ -667,7 +667,6 @@
  902           FORMAT (100A11)
  
             ENDIF
-        print*,"finished reading LAI"               
  
 ! --- LAI_* IS THE LAI FOR LANDUSE * (8 TOTAL IN LANDLAI.TXT)
 
