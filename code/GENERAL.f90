@@ -271,17 +271,14 @@ WRITE(*,*) 'OUTPUT files will be written in directory ',TRIM(OUTPATH)
           
 !      CALL RPSWATERUSE  ! Read HUC area, elevation, and slope
       
-      print*,"finish read Land cover  data"
 	  
       CALL RPSLAI     ! Read LAI data
       
-      print*,"finish read LAI  data"
 	  
       CALL RPSCLIMATE  ! Read calimate data
 
     !  CALL  RPSVALID   ! Read Runoff validation data
 
-      print*,"finish read Climate data"
 	  
 !----------------------Calibration part------------------------------------      
 
