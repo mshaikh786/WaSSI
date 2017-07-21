@@ -1,12 +1,12 @@
-FC=gfortran
+FC=ifort
 SRC= GENERAL.f90 PET.f90 VALIDATION.f90 CARBONBAL.f90 OUTPUT.f90 SUMMARY.f90 WARMUP.f90 WATERBAL.f90
 OBJ= GENERAL.o PET.o VALIDATION.o CARBONBAL.o OUTPUT.o SUMMARY.o WARMUP.o WATERBAL.o
-ALLINEA_SGIMPT=-L/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/INTEL/mpt  -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr -Wl,-rpath=/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/INTEL/mpt
-ALLINEA_MPICH=-L/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/GNU/4.8.5/mpich  -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr -Wl,-rpath=/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/GNU/4.8.5/mpich
+
+ALLINEA_LIBS=-L/group/pawsey0001/mshaikh/software/sles12sp2/forge-libs/7.0.5/intel/mvapich -lmap-sampler -lmap-sampler-pmpi 
 DEBUG = -g -mcmodel=medium -cpp -fPIC -fopenmp  
 FCFLAGS =  $(DEBUG) -J./ 
 FFLAGS = $(FCFLAGS)
-LDFLAGS_MAP=$(ALLINEA_MPICH)
+LDFLAGS_MAP=$(ALLINEA_LIBS)
 LDFLAGS=
 all: WaSSI-omp
 	
