@@ -1,20 +1,25 @@
-FC=ifort
-SRC= GENERAL.f90 PET.f90 VALIDATION.f90 CARBONBAL.f90 OUTPUT.f90 SUMMARY.f90 WARMUP.f90 WATERBAL.f90
-OBJ= GENERAL.o PET.o VALIDATION.o CARBONBAL.o OUTPUT.o SUMMARY.o WARMUP.o WATERBAL.o
+FC=gfortran
+SRC= GENERAL.f90 PET.f90 VALIDATION.f90 CARBONBAL.f90 OUTPUT.f90 SUMMARY.f90 WARMUP.f90 WATERBAL.f90 #ARRAY_ALLO.f90 ARRAY_DEALLO.f90 MPI_SUBROUTINES.f90 PARALLEL_FILE_IO.f90 
+OBJ= GENERAL.o PET.o VALIDATION.o CARBONBAL.o OUTPUT.o SUMMARY.o WARMUP.o WATERBAL.o #ARRAY_ALLO.o ARRAY_DEALLO.o MPI_SUBROUTINES.o PARALLEL_FILE_IO.o 
 
-ALLINEA_LIBS=-L/group/pawsey0001/mshaikh/software/sles12sp2/forge-libs/7.0.5/intel/mvapich -lmap-sampler -lmap-sampler-pmpi 
-DEBUG = -g -mcmodel=medium -cpp -fPIC -fopenmp  
-FCFLAGS =  $(DEBUG) -J./ 
-FFLAGS = $(FCFLAGS)
-LDFLAGS_MAP=$(ALLINEA_LIBS)
-LDFLAGS=
-all: WaSSI-omp
+
+ALLINEA_MPICH=-dynamic -L/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/GNU/4.8.5/mpich  -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr -Wl,-rpath=/group/pawsey0001/mshaikh/software/sles11sp4/forge-libs/7.0.4/GNU/4.8.5/mpich
+OMPFLAG=-fopenmp
+DEBUG = -g -mcmodel=large -cpp -fPIC
+FCFLAGS = $(DEBUG) 
+FFLAGS =  $(DEBUG) 
+LDFLAGS= -dynamic
+all: WaSSI-serial WaSSI-omp
 	
-WaSSI-omp: WaSSI-omp.o
-	$(FC) $(FFLAGS) $(OMPFLAG) $(OBJ) $(LDFLAGS_MAP) -o WaSSI-omp-map-zeus
-	$(FC) $(FFLAGS) $(OBJ) $(LDFLAGS) -o WaSSI-omp-zeus
-WaSSI-omp.o: $(SRC)
+WaSSI-serial: WaSSI-serial.o
+	$(FC) $(FFLAGS) $(OBJ) $(ALLINEA_MPICH) -o WaSSI-serial-map
+	$(FC) $(FFLAGS) $(OBJ) -o WaSSI-serial
+WaSSI-serial.o: $(SRC)
 	$(FC) $(FCFLAGS) -c $(SRC)
-
+WaSSI-omp: WaSSI-omp.o
+	$(FC) $(FFLAGS) $(OMPFLAG) $(OBJ) $(ALLINEA_MPICH) $(LDFLAGS) -o WaSSI-omp-map
+	$(FC) $(FFLAGS) $(OMPFLAG) $(LDFLAGS) $(OBJ) -o WaSSI-omp
+WaSSI-omp.o:
+	$(FC) $(FCFLAGS) $(OMPFLAG) -c $(SRC)
 clean:
-	rm *.o *.mod a.out fort.* WaSSI-omp-zeus WaSSI-omp-map-zeus
+	rm *.o *.mod a.out fort.* WaSSI-serial WaSSI-omp WaSSI-serial-map WaSSI-omp-map

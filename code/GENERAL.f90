@@ -7,7 +7,7 @@
 
 ! Grid numbers
       INTEGER MAX_GRIDS, MAX_YEARS
-      PARAMETER (MAX_GRIDS=10108,MAX_YEARS=32)
+      PARAMETER (MAX_GRIDS=141100,MAX_YEARS=44)
 
 ! BASIC
       INTEGER NGRID,NYEAR,NLC,BYEAR,IYSTART,IYEND
@@ -146,8 +146,8 @@ REAL,POINTER:: RUNLAND(:,:,:,:),ETLAND(:,:,:,:),GEPLAND(:,:,:,:)
       DATA MONTHL/31,29,31,30,31,30,31,31,30,31,30,31/
       
 ! --- For reading in the command line arguments 
-      CHARACTER(len=256),ALLOCATABLE:: ARGS(:) 
-      CHARACTER(len=256) ARCH,INPATH,OUTPATH
+      CHARACTER(len=32),ALLOCATABLE:: ARGS(:) 
+      CHARACTER(len=32) ARCH,INPATH,OUTPATH
       INTEGER (kind=4) iargc,INDX
 ! --- Write introductory information to screen
       
@@ -271,14 +271,17 @@ WRITE(*,*) 'OUTPUT files will be written in directory ',TRIM(OUTPATH)
           
 !      CALL RPSWATERUSE  ! Read HUC area, elevation, and slope
       
+      print*,"finish read Land cover  data"
 	  
       CALL RPSLAI     ! Read LAI data
       
+      print*,"finish read LAI  data"
 	  
       CALL RPSCLIMATE  ! Read calimate data
 
     !  CALL  RPSVALID   ! Read Runoff validation data
 
+      print*,"finish read Climate data"
 	  
 !----------------------Calibration part------------------------------------      
 
