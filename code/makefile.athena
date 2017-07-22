@@ -1,0 +1,20 @@
+FC=ifort
+SRC= GENERAL.f90 PET.f90 VALIDATION.f90 CARBONBAL.f90 OUTPUT.f90 SUMMARY.f90 WARMUP.f90 WATERBAL.f90
+OBJ= GENERAL.o PET.o VALIDATION.o CARBONBAL.o OUTPUT.o SUMMARY.o WARMUP.o WATERBAL.o
+
+ALLINEA_LIBS=-L/group/pawsey0001/mshaikh/software/sles12sp2/forge-libs/7.0.5/intel/mvapich -lmap-sampler -lmap-sampler-pmpi 
+DEBUG = -g -mcmodel=medium -cpp -fPIC -fopenmp  
+FCFLAGS =  $(DEBUG) -J./ 
+FFLAGS = $(FCFLAGS)
+LDFLAGS_MAP=$(ALLINEA_LIBS)
+LDFLAGS=
+all: WaSSI-omp
+	
+WaSSI-omp: WaSSI-omp.o
+	$(FC) $(FFLAGS) $(OMPFLAG) $(OBJ) $(LDFLAGS_MAP) -o WaSSI-omp-map-zeus
+	$(FC) $(FFLAGS) $(OBJ) $(LDFLAGS) -o WaSSI-omp-zeus
+WaSSI-omp.o: $(SRC)
+	$(FC) $(FCFLAGS) -c $(SRC)
+
+clean:
+	rm *.o *.mod a.out fort.* WaSSI-omp-zeus WaSSI-omp-map-zeus
