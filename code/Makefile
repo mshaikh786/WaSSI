@@ -4,12 +4,14 @@ DEBUG =
 PRGENV= ${PE_ENV}
 PREPROCESS= 
 #LDFLAGS=-L/group/pawsey0001/mshaikh/software/cle52up04/forge-libs/$(PE_ENV) -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr
+#LDFLAGS=-dynamic -L/group/pawsey0001/mshaikh/software/cle52up04/forge-libs/GNU/4.8.2 -lmap-sampler-pmpi -lmap-sampler -Wl,--eh-frame-hdr -Wl,-rpath=/group/pawsey0001/mshaikh/software/cle52up04/forge-libs/GNU/4.8.2
+LDFLAGS=-Wl,@/group/pawsey0001/mshaikh/software/cle52up04/forge-libs/GNU/4.8.2/allinea-profiler.ld
 ifeq ($(PRGENV),INTEL)
 	OMPFLAG=-openmp
 	DEBUG=-g -dynamic -mcmodel=medium -fpp -fPIC
 else ifeq ($(PRGENV),GNU)
 	OMPFLAG=-fopenmp
-	DEBUG=-g -dynamic -mcmodel=medium -cpp -fPIC
+	DEBUG=-g -mcmodel=medium -cpp -fPIC
 else ifeq ($(PRGENV),CRAY)
 	OMPFLAG= -homp
 	DEBUG=-G2 -dynamic -hpic -fPIC
