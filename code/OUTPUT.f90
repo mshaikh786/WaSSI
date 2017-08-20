@@ -23,10 +23,186 @@ SUBROUTINE OUTPUT
 
     !MPI specific varaibles
     real*4, allocatable:: buffer(:)
-    integer:: nelement,indx
+    integer(kind=8):: nelement,indx
 
-!VALIDATION.TXT
-    nelement = NGRID * NYEAR * 12 * validation_columns
+    !HUCCARBON.TXT
+    nelement = int((NGRID * huccarbon_columns),8)
+    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
+    allocate(buffer(nelement))
+    indx=1
+    do I = 1,NGRID
+                buffer(indx)    =   real((my_grid_start - 1) + I)
+                buffer(indx+1)  =   real(NUM_YEAR_C(I))
+                buffer(indx+2)  =   AHUCGEP(I)
+                buffer(indx+3)  =   AHUCRE(I)
+                buffer(indx+4)  =   AHUCNEE(I)
+                indx=indx+huccarbon_columns
+    enddo
+    call writeData(huccarbon_fh,nelement,buffer)
+
+!MONTHFLOW.TXT
+    nelement = int((NGRID * NYEAR * 12 * monthflow_columns),8)
+
+    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
+    allocate(buffer(nelement))
+
+    indx=1
+    do I = 1,NGRID
+        do J = 1,NYEAR
+            !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
+			IDY = J + BYEAR - 1
+			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then
+				do IM = 1,12
+					buffer(indx)    =   real((my_grid_start - 1) + I)
+					buffer(indx+1)  =   real(IDY)
+					buffer(indx+2)  =   real(IM)
+					buffer(indx+3)  =   RAIN(I,J,IM)
+					buffer(indx+4)  =   TEMP(I,J,IM)
+					buffer(indx+5)  =   AVSMC(I,J,IM)
+					buffer(indx+6)  =   SP(I,J,IM)
+					buffer(indx+7)  =   PET(I,J,IM)
+					buffer(indx+8)  =   AET(I,J,IM)
+					buffer(indx+9)  =   PAET(I,J,IM)
+					buffer(indx+10) =   TRUNOFF(I,J,IM)
+					buffer(indx+11) =   BASEFLOW(I,J,IM)
+					buffer(indx+12) =   STRFLOW(I,J,IM)
+					indx=indx+monthflow_columns
+				enddo
+			endif
+        enddo
+    enddo
+    call writeData(monthflow_fh,nelement,buffer)
+
+
+!SOILSTORAGE.TXT
+    nelement = int((NGRID * NYEAR * 12 * soilstorage_columns),8)
+
+    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
+    allocate(buffer(nelement))
+
+    indx=1
+    do I = 1,NGRID
+        do J = 1,NYEAR
+            !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
+			IDY = J + BYEAR - 1
+			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then
+				do IM = 1,12
+					buffer(indx)    =   real((my_grid_start - 1) + I)
+					buffer(indx+1)  =   real(IDY)
+					buffer(indx+2)  =   real(IM)
+					buffer(indx+3)  =   AVUZTWC(I,J,IM)
+					buffer(indx+4)  =   AVUZFWC(I,J,IM)
+					buffer(indx+5)  =   AVLZTWC(I,J,IM)
+					buffer(indx+6)  =   AVLZFPC(I,J,IM)
+					buffer(indx+7)  =   AVLZFSC(I,J,IM)
+					indx=indx+soilstorage_columns
+				enddo
+			endif
+        enddo
+    enddo
+    call writeData(soilstorage_fh,nelement,buffer)
+
+
+!MONTHCARBON.TXT
+    nelement = int((NGRID * NYEAR * 12 * monthcarbon_columns),8)
+
+    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
+    allocate(buffer(nelement))
+
+    indx=1
+    do I = 1,NGRID
+        do J = 1,NYEAR
+            !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
+			IDY = J + BYEAR - 1
+			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then
+				do IM = 1,12
+					buffer(indx)    =   real((my_grid_start - 1) + I)
+					buffer(indx+1)  =   real(IDY)
+					buffer(indx+2)  =   real(IM)
+					buffer(indx+3)  =   GEPM(I,J, IM)
+					buffer(indx+4)  =   RECOM(I,J,IM)
+					buffer(indx+5)  =   NEEM(I,J,IM)
+					indx=indx+monthcarbon_columns
+				enddo
+			endif
+        enddo
+    enddo
+    call writeData(monthcarbon_fh,nelement,buffer)
+
+!ANNUALFLOW.DAT
+    nelement = int((NGRID * NYEAR * annualflow_columns),8)
+    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
+    allocate(buffer(nelement))
+    indx=1
+    do I = 1,NGRID
+        do J = 1,NYEAR
+            !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
+            IDY = J + BYEAR - 1
+			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then
+                buffer(indx)    =   real((my_grid_start - 1) + I)
+                buffer(indx+1)  =   real(IDY)
+                buffer(indx+2)  =   ANURAIN(I,J)
+                buffer(indx+3)  =   ANUPET(I,J)
+                buffer(indx+4)  =   ANUAET(I,J)
+                buffer(indx+5)  =   ANUPAET(I,J)
+                buffer(indx+6)  =   ANURUN(I,J)
+                buffer(indx+7)  =   ARUNRT(I,J)
+                buffer(indx+8)  =   AETRT(I,J)
+                buffer(indx+9)  =   ETRATIO(I,J)
+                buffer(indx+10) =   real(NSPM(I,J))
+                buffer(indx+11) =   RFACTOR (I,J)
+                indx=indx+annualflow_columns
+			endif
+        enddo
+    enddo
+    !call print_buffer_files(nelement,buffer,annualflow_columns)
+    call writeData(annualflow_fh,nelement,buffer)
+
+!ANNUALCARBON.TXT
+
+   nelement = int((NGRID * NYEAR * annualcarbon_columns),8)
+    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
+    allocate(buffer(nelement))
+    indx=1
+    do I = 1,NGRID
+        do J = 1,NYEAR
+        !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
+            IDY = J + BYEAR - 1
+			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then   
+				IDY = J + BYEAR - 1
+                buffer(indx)    =   real((my_grid_start - 1) + I)
+                buffer(indx+1)  =   real(IDY)
+                buffer(indx+2)  =   GEPA(I,J)
+                buffer(indx+3)  =   REOA(I,J)
+                buffer(indx+4)  =   NEEA(I,J)
+                indx=indx+annualcarbon_columns
+			endif
+        enddo
+    enddo
+    call writeData(annualcarbon_fh,nelement,buffer)
+
+   !HUCFLOW.TXT
+   nelement = int((NGRID * hucflow_columns),8)
+    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
+    allocate(buffer(nelement))
+    indx=1
+    do I = 1,NGRID
+                buffer(indx)    =   real((my_grid_start - 1) + I)
+                buffer(indx+1)  =   RAINALL(I)
+                buffer(indx+2)  =   PETALL(I)
+                buffer(indx+3)  =   AETALL(I)
+                buffer(indx+4)  =   RUNALL(I)
+                buffer(indx+5)  =   RUNRATIO(I)
+                buffer(indx+6)  =   ETRATIO_GRD(I)
+                buffer(indx+7)  =   TRATIO(I)
+                buffer(indx+8)  =   real(NUM_year(I))
+                indx=indx+hucflow_columns
+    enddo
+    call writeData(hucflow_fh,nelement,buffer)
+
+
+    !VALIDATION.TXT
+    nelement = int((NGRID * NYEAR * 12 * validation_columns),8)
     if (allocated(buffer) .eqv. .true.) deallocate(buffer)
 	allocate(buffer(nelement))
     indx=1
@@ -61,181 +237,6 @@ SUBROUTINE OUTPUT
     enddo
     call writeData(validation_fh,nelement,buffer)
 
-
-!MONTHFLOW.TXT
-    nelement = NGRID * NYEAR * 12 * monthflow_columns
-
-    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
-    allocate(buffer(nelement))
-
-    indx=1
-    do I = 1,NGRID
-        do J = 1,NYEAR
-            !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
-			IDY = J + BYEAR - 1
-			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then
-				do IM = 1,12
-					buffer(indx)    =   real((my_grid_start - 1) + I)
-					buffer(indx+1)  =   real(IDY)
-					buffer(indx+2)  =   real(IM)
-					buffer(indx+3)  =   RAIN(I,J,IM)
-					buffer(indx+4)  =   TEMP(I,J,IM)
-					buffer(indx+5)  =   AVSMC(I,J,IM)
-					buffer(indx+6)  =   SP(I,J,IM)
-					buffer(indx+7)  =   PET(I,J,IM)
-					buffer(indx+8)  =   AET(I,J,IM)
-					buffer(indx+9)  =   PAET(I,J,IM)
-					buffer(indx+10) =   TRUNOFF(I,J,IM)
-					buffer(indx+11) =   BASEFLOW(I,J,IM)
-					buffer(indx+12) =   STRFLOW(I,J,IM)
-					indx=indx+monthflow_columns
-				enddo
-			endif
-        enddo
-    enddo
-    call writeData(monthflow_fh,nelement,buffer)
-
-
-!SOILSTORAGE.TXT
-    nelement = NGRID * NYEAR * 12 * soilstorage_columns
-
-    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
-    allocate(buffer(nelement))
-
-    indx=1
-    do I = 1,NGRID
-        do J = 1,NYEAR
-            !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
-			IDY = J + BYEAR - 1
-			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then
-				do IM = 1,12
-					buffer(indx)    =   real((my_grid_start - 1) + I)
-					buffer(indx+1)  =   real(IDY)
-					buffer(indx+2)  =   real(IM)
-					buffer(indx+3)  =   AVUZTWC(I,J,IM)
-					buffer(indx+4)  =   AVUZFWC(I,J,IM)
-					buffer(indx+5)  =   AVLZTWC(I,J,IM)
-					buffer(indx+6)  =   AVLZFPC(I,J,IM)
-					buffer(indx+7)  =   AVLZFSC(I,J,IM)
-					indx=indx+soilstorage_columns
-				enddo
-			endif
-        enddo
-    enddo
-    call writeData(soilstorage_fh,nelement,buffer)
-
-
-!MONTHCARBON.TXT
-    nelement = NGRID * NYEAR * 12 * monthcarbon_columns
-
-    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
-    allocate(buffer(nelement))
-
-    indx=1
-    do I = 1,NGRID
-        do J = 1,NYEAR
-            !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
-			IDY = J + BYEAR - 1
-			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then
-				do IM = 1,12
-					buffer(indx)    =   real((my_grid_start - 1) + I)
-					buffer(indx+1)  =   real(IDY)
-					buffer(indx+2)  =   real(IM)
-					buffer(indx+3)  =   GEPM(I,J, IM)
-					buffer(indx+4)  =   RECOM(I,J,IM)
-					buffer(indx+5)  =   NEEM(I,J,IM)
-					indx=indx+monthcarbon_columns
-				enddo
-			endif
-        enddo
-    enddo
-    call writeData(monthcarbon_fh,nelement,buffer)
-
-!ANNUALFLOW.DAT
-    nelement = NGRID * NYEAR * annualflow_columns
-    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
-    allocate(buffer(nelement))
-    indx=1
-    do I = 1,NGRID
-        do J = 1,NYEAR
-            !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
-            IDY = J + BYEAR - 1
-			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then
-                buffer(indx)    =   real((my_grid_start - 1) + I)
-                buffer(indx+1)  =   real(IDY)
-                buffer(indx+2)  =   ANURAIN(I,J)
-                buffer(indx+3)  =   ANUPET(I,J)
-                buffer(indx+4)  =   ANUAET(I,J)
-                buffer(indx+5)  =   ANUPAET(I,J)
-                buffer(indx+6)  =   ANURUN(I,J)
-                buffer(indx+7)  =   ARUNRT(I,J)
-                buffer(indx+8)  =   AETRT(I,J)
-                buffer(indx+9)  =   ETRATIO(I,J)
-                buffer(indx+10) =   real(NSPM(I,J))
-                buffer(indx+11) =   RFACTOR (I,J)
-                indx=indx+annualflow_columns
-			endif
-        enddo
-    enddo
-    !call print_buffer_files(nelement,buffer,annualflow_columns)
-    call writeData(annualflow_fh,nelement,buffer)
-
-!ANNUALCARBON.TXT
-
-   nelement = NGRID * NYEAR * annualcarbon_columns
-    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
-    allocate(buffer(nelement))
-    indx=1
-    do I = 1,NGRID
-        do J = 1,NYEAR
-        !-----IDY = THE CALANDER YEAR, BYEAR = YEAR TO SATRT
-            IDY = J + BYEAR - 1
-			if (IDY .ge. IYSTART .and. IDY .le. IYEND) then   
-				IDY = J + BYEAR - 1
-                buffer(indx)    =   real((my_grid_start - 1) + I)
-                buffer(indx+1)  =   real(IDY)
-                buffer(indx+2)  =   GEPA(I,J)
-                buffer(indx+3)  =   REOA(I,J)
-                buffer(indx+4)  =   NEEA(I,J)
-                indx=indx+annualcarbon_columns
-			endif
-        enddo
-    enddo
-    call writeData(annualcarbon_fh,nelement,buffer)
-
-   !HUCFLOW.TXT
-   nelement = NGRID * hucflow_columns
-    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
-    allocate(buffer(nelement))
-    indx=1
-    do I = 1,NGRID
-                buffer(indx)    =   real((my_grid_start - 1) + I)
-                buffer(indx+1)  =   RAINALL(I)
-                buffer(indx+2)  =   PETALL(I)
-                buffer(indx+3)  =   AETALL(I)
-                buffer(indx+4)  =   RUNALL(I)
-                buffer(indx+5)  =   RUNRATIO(I)
-                buffer(indx+6)  =   ETRATIO_GRD(I)
-                buffer(indx+7)  =   TRATIO(I)
-                buffer(indx+8)  =   real(NUM_year(I))
-                indx=indx+hucflow_columns
-    enddo
-    call writeData(hucflow_fh,nelement,buffer)
-
-    !HUCCARBON.TXT
-    nelement = NGRID * huccarbon_columns
-    if (allocated(buffer) .eqv. .true.) deallocate(buffer)
-    allocate(buffer(nelement))
-    indx=1
-    do I = 1,NGRID
-                buffer(indx)    =   real((my_grid_start - 1) + I)
-                buffer(indx+1)  =   real(NUM_YEAR_C(I))
-                buffer(indx+2)  =   AHUCGEP(I)
-                buffer(indx+3)  =   AHUCRE(I)
-                buffer(indx+4)  =   AHUCNEE(I)
-                indx=indx+huccarbon_columns
-    enddo
-    call writeData(huccarbon_fh,nelement,buffer)
 END
 
 #else

@@ -129,7 +129,7 @@ END
 
     !MPI specific varaibles
       real*4, allocatable:: buffer(:)
-      integer nelement,indx
+      integer(kind=8):: nelement,indx
 
 
 ! --- Read and print land use data for each active cell IN THE BASIC.OUT FILE
@@ -144,7 +144,7 @@ endif
 
 !! Open File CELLINFO.DAT in parallel and read corresponding chunk of data in a buffer and then update
 !! corresponding arrays.
-    nelement = NGRID * cellinfo_columns
+    nelement = int((NGRID * cellinfo_columns),8)
     allocate(buffer(nelement))
     call readData(cellinfo_fh,nelement,buffer)
 
@@ -163,7 +163,7 @@ endif
 
 ! --- Read and print SOIL PARAMETERS for each active cell IN THE BASIC.OUT FILE
 !
-    nelement= NGRID * soilinfo_columns
+    nelement= int((NGRID * soilinfo_columns),8)
      if (allocated(buffer) .eqv. .true.) deallocate(buffer)
     allocate(buffer(nelement))
     call readData(soilinfo_fh,nelement,buffer)
@@ -210,7 +210,7 @@ endif
 
       !MPI specific varaibles
       real*4, allocatable:: buffer(:)
-      integer nelement,indx
+      integer(kind=8):: nelement,indx
       
 ! Define the start and end year of LAI data	
 	
@@ -234,7 +234,7 @@ endif
 ! --- Read and print LAI Data from file in parallel
     !Here total elements for each MPI-task to read are
     !   local_NGRID * NUMBER OF YEARS * NUMBER OF MONTHS * NUMBER OF COLUMNS
-    nelement= NGRID * (Y_LAI_END - Y_LAI_START + 1)* 12 * landlai_columns
+    nelement= int((NGRID*(Y_LAI_END-Y_LAI_START+1)*12*landlai_columns),8)
     if (allocated(buffer) .eqv. .true.) deallocate(buffer)
     allocate(buffer(nelement))
     print*,"infomation for reading LAI",nelement,Y_LAI_END,Y_LAI_START,landlai_columns
@@ -262,11 +262,13 @@ endif
         IF  ( BYEAR .LT. LAI_S_Y)  then
           DO 202 I=1, NGRID
 
-             DO 302 J=1, LAI_S_Y-1
+             !DO 302 J=1, LAI_S_Y-1
+             DO 302 J=1, Y_LAI_START-1
 
                 DO 402 M=1, 12
 
-                LAI(I,J,M) = LAI(I,LAI_S_Y,M)
+                !LAI(I,J,M) = LAI(I,LAI_S_Y,M)
+                LAI(I,J,M) = LAI(I,Y_LAI_START,M)
 
 
 402             CONTINUE
@@ -320,7 +322,7 @@ END
 
       !MPI specific varaibles
       real*4, allocatable:: buffer(:)
-      integer nelement,indx
+      integer(kind=8):: nelement,indx
 
 
       ALLOCATE ( ANNPPT(NGRID,NYEAR), SUMANPPT(NGRID))
@@ -334,7 +336,7 @@ END
 ! --- Read and print CLIMATE Data from file in parallel
     !   Here total elements for each MPI-task to read are
     !   local_NGRID * NUMBER OF YEARS * NUMBER OF MONTHS * NUMBER OF COLUMNS
-    nelement= NGRID * NYEAR * 12 * climate_columns
+    nelement= int((NGRID * NYEAR * 12 * climate_columns),8)
     if (allocated(buffer) .eqv. .true.) deallocate(buffer)
     allocate(buffer(nelement))
     call readData(climate_fh,nelement,buffer)

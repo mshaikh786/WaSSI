@@ -281,7 +281,7 @@ PROGRAM WaSSICBZB
 
     CALL RPSCLIMATE  ! Read calimate data
 
-
+    CALL MPI_BARRIER(MPI_COMM_WORLD,ierr)
     !!----------------------Modelling for each Cell and year start------------------------------------
     !
 
@@ -338,6 +338,8 @@ PROGRAM WaSSICBZB
     !
     !! This is for output result
     !
+    CALL MPI_BARRIER(MPI_COMM_WORLD,ierr)
+    print*,"Writing output"
     CALL OUTPUT !(ICELL,IYEAR)  ! Output Annual water and carbon balances
 
    ! CALL ARRAY_DEALLO ! Deallocated all global arries
